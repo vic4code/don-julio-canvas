@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Don Julio Cocktail Menu</title>
   <style>
     body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #0f0f0f; }
@@ -17,19 +17,17 @@ const ctx = canvas.getContext('2d');
 let pageAnim = 0, revealLine = 0, revealChar = 0, currentPage = 0, bgLoaded = false;
 let lastTime = 0, charTimer = 0, blinkTimer = 0, showCursor = true;
 
-// Helper: hex to rgba
 function hexToRgba(hex, a) {
   const [r,g,b] = hex.replace('#','').match(/.{2}/g).map(x=>parseInt(x,16));
   return `rgba(${r},${g},${b},${a})`;
 }
 
-// Background image
-const bg = new Image(); bg.crossOrigin = 'anonymous';
+const bg = new Image();
+bg.crossOrigin='anonymous';
 bg.onload = () => bgLoaded = true;
 bg.onerror = () => console.warn('BG load failed');
 bg.src = 'https://via.placeholder.com/400x700.png?text=BG';
 
-// Page data
 const pages = [
   { title:'The Father of Tequila', subtitle:'Don Julio González', colors:['#A8C66B','#517A2E','#EDE6C8'], desc:['尊稱為「龍舌蘭之父」','啟發純淨植物力量'] },
   { title:'Low-Density Cultivation', subtitle:'低密度種植法', colors:['#8B5A2B','#D2B48C','#9CAF88'], desc:['間距更大，根系深植','養分不競爭，日照通風','風味集中，糖分飽滿'] },
@@ -37,14 +35,17 @@ const pages = [
   { title:'Flavor Pairing', subtitle:'材料與調和', colors:['#CC7722','#5C4033','#B7410E'], desc:['香料：黑豆蔻、南薑','堅果：可可殼、黑萊姆','茶飲：山茶、仙草','水果：百香果、柚子'] }
 ];
 
-// Resize
-function resize(){ pageAnim = revealLine = revealChar = 0; canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);} 
+function resize(){
+  pageAnim = revealLine = revealChar = 0;
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
 window.addEventListener('resize', resize);
 resize();
 
 function ease(t){ return 1 - Math.pow(1 - t, 3); }
 
-// Draw loop
 function draw(timestamp){
   if(!lastTime) lastTime = timestamp;
   const dt = timestamp - lastTime;
@@ -73,7 +74,6 @@ function draw(timestamp){
   ctx.globalAlpha = ease(pageAnim);
   ctx.translate(0, (1 - ease(pageAnim)) * 20);
 
-  // Overlay
   const grad = ctx.createLinearGradient(0,0,0,h);
   grad.addColorStop(0,'rgba(255,255,255,0.9)');
   grad.addColorStop(1,'rgba(245,245,245,0.9)');
@@ -107,12 +107,10 @@ function drawPage(ctx, page, w, h, rl, rc){
 
     if(index === cursorLine && showCursor && pageAnim >= 1) {
       const width = ctx.measureText(text).width;
-      // cursor positioned after text
       ctx.fillRect(centerX + width/2, item.y - parseInt(item.font,10), 2, parseInt(item.font,10));
     }
   });
 
-  // Color dots
   const cx = w/2, sy = 130, rad = 10;
   page.colors.forEach((c,i) => {
     ctx.beginPath();
@@ -121,61 +119,60 @@ function drawPage(ctx, page, w, h, rl, rc){
     ctx.fill();
   });
 
-  // Separator line
-  ctx.strokeStyle = '#cbd5e0';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(w * 0.1, sy + page.colors.length * 36 + 20);
-  ctx.lineTo(w * 0.9, sy + page.colors.length * 36 + 20);
-  ctx.stroke();
+  ctx.strokeStyle='#cbd5e0'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(w*0.1,sy+page.colors.length*36+20); ctx.lineTo(w*0.9,sy+page.colors.length*36+20); ctx.stroke();
 
-  // Agave pulse circle
-  const by = sy + page.colors.length * 36 + 140;
-  const pulse = 18 + 6 * Math.sin(Date.now() / 800);
-  const pg = ctx.createRadialGradient(cx, by, pulse * 0.3, cx, by, pulse);
-  pg.addColorStop(0, hexToRgba(page.colors[0], 0.8));
-  pg.addColorStop(1, hexToRgba(page.colors[0], 0.2));
-  ctx.beginPath();
-  ctx.arc(cx, by, pulse, 0, 2 * Math.PI);
-  ctx.fillStyle = pg;
-  ctx.fill();
+  drawAgave(ctx, cx, sy + page.colors.length * 36 + 220);
 
-  // Pagination arrows
-  ctx.fillStyle = '#4a5568';
-  ctx.font = '28px sans-serif';
-  ctx.textAlign = 'center';
-  if(currentPage > 0) ctx.fillText('<', 40, h / 2);
-  if(currentPage < pages.length - 1) ctx.fillText('>', w - 40, h / 2);
+  ctx.fillStyle='#4a5568'; ctx.font='28px sans-serif'; ctx.textAlign='center';
+  if(currentPage>0) ctx.fillText('<',40,h/2);
+  if(currentPage<pages.length-1) ctx.fillText('>',w-40,h/2);
+}
+
+function drawAgave(ctx, x, y){
+  const time = Date.now() / 500;
+  const scale = 1 + 0.2 * Math.sin(time);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  const leaves = 7;
+  const baseColor = '#5A8F3D';
+  const tipColor = '#A8D08D';
+  for (let i = 0; i < leaves; i++) {
+    const angleOffset = 2 * Math.sin(time + i);
+    const angle = (i - (leaves-1)/2) * 20 * Math.PI/180 + angleOffset * Math.PI/180;
+    ctx.save();
+    ctx.rotate(angle);
+    const gradient = ctx.createLinearGradient(0, 0, 0, -60);
+    gradient.addColorStop(0, baseColor);
+    gradient.addColorStop(1, tipColor);
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(10, -30, 0, -60);
+    ctx.quadraticCurveTo(-10, -30, 0, 0);
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
 }
 
 canvas.addEventListener('click', e => {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
-  if(x < 60 && currentPage > 0) {
-    currentPage--; pageAnim=0; revealLine=0; revealChar=0; charTimer=0;
-  } else if(x > canvas.clientWidth - 60 && currentPage < pages.length - 1) {
-    currentPage++; pageAnim=0; revealLine=0; revealChar=0; charTimer=0;
-  }
+  if(x < 60 && currentPage > 0) { currentPage--; pageAnim=0; revealLine=0; revealChar=0; charTimer=0; }
+  else if(x > canvas.clientWidth - 60 && currentPage < pages.length - 1) { currentPage++; pageAnim=0; revealLine=0; revealChar=0; charTimer=0; }
 });
 
 canvas.addEventListener('touchstart', e => {
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
   const x = t.clientX - rect.left;
-  if(x < 60 && currentPage > 0) {
-    currentPage--; pageAnim=0; revealLine=0; revealChar=0; charTimer=0;
-  } else if(x > canvas.clientWidth - 60 && currentPage < pages.length - 1) {
-    currentPage++; pageAnim=0; revealLine=0; revealChar=0; charTimer=0;
-  }
+  if(x < 60 && currentPage > 0) { currentPage--; pageAnim=0; revealLine=0; revealChar=0; charTimer=0; }
+  else if(x > canvas.clientWidth - 60 && currentPage < pages.length - 1) { currentPage++; pageAnim=0; revealLine=0; revealChar=0; charTimer=0; }
 });
 
-function roundRect(x,y,w,h,rad) {
-  ctx.beginPath(); ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+rad); ctx.lineTo(x+w,y+h-rad);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h); ctx.lineTo(x+rad,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-rad); ctx.lineTo(x,y+rad);
-  ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath();
-}
+function roundRect(x,y,w,h,rad){ ctx.beginPath(); ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rad); ctx.lineTo(x+w,y+h-rad); ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h); ctx.lineTo(x+rad,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-rad); ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath(); }
 </script>
 </body>
 </html>
