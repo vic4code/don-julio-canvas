@@ -1,36 +1,68 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { menuPages } from '../menuData';
 import { AnimatePresence, motion } from 'framer-motion';
+import ResponsiveWrapper from './ResponsiveWrapper';
 
 const images = import.meta.glob('../assets/*.svg', { eager: true, as: 'url' });
 
 // 支援 HTML 標籤的 typewriter，整段一起打字
 function TypewriterHTML({ html, className = '', typeSpeed = 40, delay = 500, onDone }) {
   const [displayed, setDisplayed] = useState('');
+  const [isDone, setIsDone] = useState(false);
+  
   useEffect(() => {
     let i = 0;
-    let tag = false;
-    let out = '';
+    let isInTag = false;
+    let buffer = '';
+    let timeoutId;
+    
     function type() {
       if (i < html.length) {
-        if (html[i] === '<') tag = true;
-        if (tag) {
-          while (i < html.length && html[i] !== '>') out += html[i++];
-          if (i < html.length) out += html[i++];
-          tag = false;
-        } else {
-          out += html[i++];
+        // 處理 HTML 標籤
+        if (html[i] === '<') {
+          isInTag = true;
         }
-        setDisplayed(out);
-        setTimeout(type, tag ? 0 : typeSpeed);
-      } else if (onDone) {
-        onDone();
+        
+        // 在標籤內快速添加所有字符
+        if (isInTag) {
+          // 收集整個標籤
+          while (i < html.length && html[i] !== '>') {
+            buffer += html[i++];
+          }
+          if (i < html.length) {
+            buffer += html[i++]; // 添加 '>'
+          }
+          isInTag = false;
+          setDisplayed(buffer);
+          timeoutId = setTimeout(type, 0); // 立即繼續
+        } else {
+          // 正常文字一個字符一個字符添加
+          buffer += html[i++];
+          setDisplayed(buffer);
+          timeoutId = setTimeout(type, typeSpeed);
+        }
+      } else {
+        // 完成所有文字
+        setIsDone(true);
+        if (onDone) onDone();
       }
     }
+    
+    // 重置狀態
     setDisplayed('');
-    setTimeout(type, delay);
-    // eslint-disable-next-line
-  }, [html]);
+    setIsDone(false);
+    buffer = '';
+    i = 0;
+    
+    // 延遲開始打字
+    timeoutId = setTimeout(type, delay);
+    
+    // 清理函數
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [html, typeSpeed, delay, onDone]);
+  
   return <div className={className} dangerouslySetInnerHTML={{ __html: displayed }} />;
 }
 
@@ -142,10 +174,10 @@ function MultiStepTypewriter({ steps, typeSpeed = 30, delay = 300 }) {
 
 const imgBreath = {
   animate: {
-    scale: [1, 1.08, 1],
-    y: [0, -18, 0],
-    opacity: [1, 0.97, 1],
-    transition: { duration: 3.2, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }
+    scale: [1, 1.02, 1],
+    y: [0, -5, 0],
+    opacity: [1, 0.99, 1],
+    transition: { duration: 6, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }
   }
 };
 
@@ -161,7 +193,8 @@ export default function MenuPager() {
   const containerRef = useRef(null);
 
   // === page 1 文字顯示進度 ===
-  const [beanPageStep, setBeanPageStep] = useState(0);
+  const [beanTopDone, setBeanTopDone] = useState(false);
+  const [beanBottomDone, setBeanBottomDone] = useState(false);
 
   // === page 3 下半段顯示狀態 ===
   const [showBottom, setShowBottom] = useState(false);
@@ -171,14 +204,17 @@ export default function MenuPager() {
   const topLines = [
     'On top like a',
     '<span class="font-extrabold text-5xl md:text-7xl block leading-tight">salad dressing</span>',
-    ', floating',
-    'combines purple cabbage , beetroot , Don Julio Reposado ,',
+    ', floating combines purple cabbage , beetroot , Don Julio Reposado ,',
     'and Ice Wine of Cabernet .'
   ];
 
+  // 在 MenuPager 組件頂部添加這些狀態（和其他狀態變量一起）
+  const [showPage3BottomTexts, setShowPage3BottomTexts] = useState(false);
+
   // 每次切換頁面時重設
   useEffect(() => {
-    setBeanPageStep(0);
+    setBeanTopDone(false);
+    setBeanBottomDone(false);
     if (page === 3) {
       setShowBottom(false);
       setTopStep(0);
@@ -187,15 +223,15 @@ export default function MenuPager() {
 
   // 豆子頁下半部顯示狀態
   useEffect(() => {
-    if (page === 1) setBeanPageStep(0);
+    if (page === 1) setBeanTopDone(false);
   }, [page]);
 
   // 滑動/拖曳事件
   const paginate = (newDirection) => {
     setPage(([p]) => {
       let next = (p + newDirection + numPages) % numPages;
-      // 切到豆子頁時重設 beanPageStep
-      if (next === 1) setBeanPageStep(0);
+      // 切到豆子頁時重設 beanTopDone
+      if (next === 1) setBeanTopDone(false);
       return [next, newDirection];
     });
   };
@@ -248,18 +284,27 @@ export default function MenuPager() {
     animate: { scale: 1, opacity: 1, y: 0, transition: { duration: 0.8, type: 'spring' } }
   };
 
-  // 美化箭頭 SVG
+  // 美化箭頭 SVG - 極簡版本
   const ArrowSVG = ({ left, onClick }) => (
     <button
       type="button"
       aria-label={left ? 'Previous' : 'Next'}
       onClick={onClick}
-      className={`absolute top-1/2 ${left ? 'left-4' : 'right-4'} z-20 select-none bg-white/80 shadow-lg rounded-full p-2 hover:scale-110 hover:bg-white/100 transition border border-gray-200`}
-      style={{ pointerEvents: 'auto', transform: 'translateY(-50%)' }}
+      className={`absolute top-1/2 ${left ? 'left-3' : 'right-3'} z-20 select-none rounded-full p-1.5 hover:bg-gray-100/50 transition-colors`}
+      style={{ 
+        pointerEvents: 'auto', 
+        transform: 'translateY(-50%)',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)'
+      }}
     >
-      <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="22" cy="22" r="21" fill="#fff" stroke="#e5e7eb" strokeWidth="2" />
-        <path d={left ? "M27 14L19 22L27 30" : "M17 14L25 22L17 30"} stroke="#222" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path 
+          d={left ? "M17 7L10 14L17 21" : "M11 7L18 14L11 21"} 
+          stroke="#222" 
+          strokeWidth="1.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+        />
       </svg>
     </button>
   );
@@ -299,6 +344,20 @@ export default function MenuPager() {
     <motion.img key="mung" src={images['../assets/mung_beans.svg']} alt="mung" className="bean-img" variants={imgBreath} initial="initial" animate="animate" />
   ];
 
+  // 在 MenuPager 中添加 useEffect 來處理第 3 頁的文字顯示
+  useEffect(() => {
+    // 只有當頁面為第 3 頁時才設置計時器
+    if (page === 3) {
+      const timer = setTimeout(() => {
+        setShowPage3BottomTexts(true);
+      }, 2500);
+      return () => clearTimeout(timer);
+    } else {
+      // 切換到其他頁面時重置狀態
+      setShowPage3BottomTexts(false);
+    }
+  }, [page]);
+
   // 每頁內容（保留原有排版，主圖用 motion.img，主標題用 Typewriter）
   const renderPage = () => {
     if (page === 0) {
@@ -317,13 +376,13 @@ export default function MenuPager() {
           <div className="w-full text-center">
             <TypewriterSequenceHTML
               lines={pageData.title}
-              className="text-4xl md:text-5xl font-extrabold font-space mb-2"
+              className="text-5xl md:text-6xl font-extrabold font-space mb-3"
               typeSpeed={20}
               delay={200}
             />
             <TypewriterSequenceHTML
               lines={pageData.subtitle}
-              className="text-xl md:text-2xl font-normal font-space mt-1"
+              className="text-2xl md:text-3xl font-normal font-space mt-2"
               typeSpeed={20}
               delay={200}
             />
@@ -332,31 +391,64 @@ export default function MenuPager() {
       );
     }
     if (page === 1) {
-      const steps = [
-        {
-          html: 'I combined three colors of local beans from',
-          className: "text-xl font-normal font-space mb-2 text-center"
-        },
-        {
-          html: '<span class="font-extrabold text-6xl">Canada and Taiwan,</span>',
-          className: "font-extrabold text-6xl text-center mb-2"
-        },
-        {
-          html: 'boosts the protein.',
-          className: "text-xl font-normal font-space mb-6 text-center"
-        },
-        {
-          html: 'And add salt brings out a richer <br>soy flavor, and triggers<br><span class="font-extrabold text-4xl">emulsification.</span>',
-          className: "text-lg font-normal font-space text-center mt-2"
-        }
+      const topLines = [
+        'I combined three colors of local beans from',
+        '<span class="font-extrabold text-6xl">Canada and Taiwan,</span>',
+        'boosts the protein.'
       ];
 
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4 pt-4 pb-4">
-          <MultiStepTypewriter steps={steps} typeSpeed={30} delay={200} />
-          <div className="beans-row mt-12 mb-12" style={{ justifyContent: 'center' }}>
-            {beanImgs}
-          </div>
+          {/* 上半部文字，先顯示 */}
+          <TypewriterSequenceHTML
+            lines={topLines}
+            className="text-xl font-normal font-space mb-2 text-center"
+            typeSpeed={25}
+            delay={100}
+            onDone={() => setBeanTopDone(true)}
+            externalStep={beanTopDone ? topLines.length : 0}
+          />
+          
+          {/* 豆子圖片區，在上半部完成後顯示 */}
+          {beanTopDone && (
+            <div className="flex justify-center items-center gap-10 my-10">
+              {beanImgs.map((bean, index) => (
+                <motion.div 
+                  key={index}
+                  className="scale-150 md:scale-[1.75]"
+                  initial={{ opacity: 0, scale: 1 }}
+                  animate={{ opacity: 1, scale: 1.5 }}
+                  transition={{ duration: 0.5, delay: index * 0.15 }}
+                >
+                  {bean}
+                </motion.div>
+              ))}
+            </div>
+          )}
+          
+          {/* 下半部文字優化，分兩段處理 */}
+          {beanTopDone && (
+            <div className="mt-8 text-center">
+              {/* 第一段 */}
+              <TypewriterHTML
+                html="And add salt brings out a richer soy flavor, and triggers"
+                className="text-lg font-normal font-space mb-2"
+                typeSpeed={25}
+                delay={600}
+                onDone={() => setTimeout(() => setBeanBottomDone(true), 200)}
+              />
+              
+              {/* 第二段 - emulsification (單獨一行) */}
+              {beanBottomDone && (
+                <TypewriterHTML
+                  html='<span class="font-extrabold text-4xl">emulsification.</span>'
+                  className="text-center block mt-1"
+                  typeSpeed={30}
+                  delay={100}
+                />
+              )}
+            </div>
+          )}
         </div>
       );
     }
@@ -368,11 +460,11 @@ export default function MenuPager() {
         },
         {
           html: 'the natural <span class="font-extrabold text-5xl md:text-7xl">charred aroma</span> of asparagus, then infusing it into juice.',
-          className: "font-bold text-2xl md:text-4xl mb-8 text-center"
+          className: "text-2xl md:text-4xl font-normal mb-8 text-center"
         },
         {
           html: 'And add fresh herbs<br>infuse together to create<br>the flavor of a <span class="font-extrabold text-5xl md:text-7xl">Warm Salad.</span>',
-          className: "text-xl md:text-2xl font-normal font-space text-center mt-12"
+          className: "text-xl md:text-2xl font-normal font-space text-center mt-20"
         }
       ];
 
@@ -393,7 +485,7 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/asparagus.svg']}
             alt="asparagus1"
-            className="absolute w-[40vw] max-w-[360px] right-[-14vw] top-[20%] z-0"
+            className="absolute w-[40vw] max-w-[360px] right-[-10vw] top-[20%] z-0"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -402,7 +494,7 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/asparagus.svg']}
             alt="asparagus2"
-            className="absolute w-[20vw] max-w-[360px] right-[-20vw] top-[35%] z-0"
+            className="absolute w-[20vw] max-w-[360px] right-[-24vw] top-[35%] z-0"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -411,7 +503,7 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/asparagus.svg']}
             alt="asparagus3"
-            className="absolute w-[30vw] max-w-[360px] right-[-25vw] top-[50%] z-0"
+            className="absolute w-[30vw] max-w-[360px] right-[-30vw] top-[50%] z-0"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -422,7 +514,7 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/smoke.svg']}
             alt="smoke"
-            className="absolute w-[20vw] max-w-[240px] right-[10vw] top-[50%] z-10"
+            className="absolute w-[20vw] max-w-[240px] right-[10vw] top-[55%] z-10"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -442,7 +534,7 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/verbena.svg']}
             alt="verbena"
-            className="absolute w-[70vw] max-w-[580px] left-[-30vw] bottom-[-35vw] z-0"
+            className="absolute w-[70vw] max-w-[580px] left-[-20vw] bottom-[-35vw] z-0"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -451,27 +543,14 @@ export default function MenuPager() {
 
           {/* 文字區塊 */}
           <div className="relative z-20 w-full max-w-[360px] md:max-w-[480px] mx-auto text-center px-4">
-            <MultiStepTypewriter steps={steps} typeSpeed={30} delay={200} />
+            <div className="backdrop-blur-[1px] p-2 rounded-lg text-shadow-light">
+              <MultiStepTypewriter steps={steps} typeSpeed={30} delay={200} />
+            </div>
           </div>
         </div>
       );
     }
     if (page === 3) {
-      // 合併上下段 lines，最後一段靠右下
-      const lines = [
-        'On top like a',
-        '<span class="font-extrabold text-5xl md:text-7xl block leading-tight">salad dressing</span>',
-        ', floating',
-        'combines purple cabbage , beetroot , Don Julio Reposado ,',
-        'and Ice Wine of Cabernet .',
-        // 右下段
-        '<div class="absolute right-0 bottom-0 mb-8 mr-2 text-right max-w-[13rem] md:max-w-[16rem] pr-0 leading-tight" style=\"line-height:1.1;\">' +
-        '<span class="font-bold text-2xl md:text-3xl">Pillitteri\'s</span><br/>' +
-        '<span class="font-extrabold text-5xl md:text-7xl block leading-tight">late<br/>harvest</span><br/>' +
-        '<span class="text-xl md:text-2xl font-normal">icewine,</span><br/>' +
-        '<span class="text-xl md:text-2xl font-normal">made from Cabernet grapes,<br>is rich in red berry flavors.</span>' +
-        '</div>'
-      ];
       return (
         <div className="relative flex flex-col justify-between h-screen bg-white px-4 pt-8 pb-8 overflow-hidden">
           {/* 插圖：右上 beetroot、左下 cabbage、右中 grapes */}
@@ -500,12 +579,41 @@ export default function MenuPager() {
             animate="animate"
           />
 
-          {/* 主要內容：合併打字動畫 */}
-          <div className="relative z-20 w-full h-full">
-            <TypewriterSequenceHTML
-              lines={lines}
-              className="text-2xl md:text-3xl font-space font-bold leading-tight text-left mb-2"
-              typeSpeed={30}
+          {/* 使用文字陰影增加可讀性 */}
+          <div className="relative z-30 w-full h-full">
+            <MultiStepTypewriter
+              steps={[
+                {
+                  html: '<span class="text-shadow-strong">On top like a</span>',
+                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
+                },
+                {
+                  html: '<span class="font-extrabold text-5xl md:text-7xl block leading-tight text-shadow-strong">salad dressing</span>',
+                  className: "text-left"
+                },
+                {
+                  html: '<span class="text-shadow-strong">, floating</span>',
+                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
+                },
+                {
+                  html: '<span class="text-shadow-strong">combines purple cabbage, beetroot, Don Julio Reposado,</span>',
+                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left mt-4"
+                },
+                {
+                  html: '<span class="text-shadow-strong">and Ice Wine of Cabernet.</span>',
+                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
+                },
+                {
+                  html: `<div class="absolute right-0 bottom-0 mb-8 mr-2 text-right max-w-[15rem] md:max-w-[18rem] pr-0">
+                    <span class="font-normal text-2xl md:text-3xl text-shadow-strong">Pillitteri's</span><br/>
+                    <span class="font-extrabold text-5xl md:text-7xl block leading-tight text-shadow-strong" style="line-height:1.1;">late<br/>harvest</span><br/>
+                    <span class="font-normal text-xl md:text-2xl text-shadow-strong">icewine,</span><br/>
+                    <span class="font-normal text-xl md:text-2xl text-shadow-strong">made from Cabernet grapes,<br>is rich in red berry flavors.</span>
+                  </div>`,
+                  className: ""
+                }
+              ]}
+              typeSpeed={20}
               delay={200}
             />
           </div>
@@ -513,38 +621,54 @@ export default function MenuPager() {
       );
     }
     if (page === 4) {
-      const lines = [
-        `<div class="flex flex-col md:flex-row items-start md:items-center w-full max-w-2xl mx-auto mb-6 md:gap-4">
-          <img src="${images['../assets/plant_based_logo.svg']}" alt="plant-based-logo" class="w-14 h-14 md:w-20 md:h-20 mb-2 md:mb-0 md:mr-4 flex-shrink-0" style="z-index:2;" />
-          <div class="flex flex-col justify-center w-full">
-            <div class="font-extrabold font-space text-left leading-tight mb-1 mt-0 text-[clamp(2.2rem,7vw,3.5rem)] md:text-[clamp(3rem,5vw,4.5rem)]">Planta Mood</div>
-            <div class="font-bold font-space text-left leading-snug max-w-2xl text-[clamp(1.1rem,3.5vw,1.7rem)] md:text-[clamp(1.3rem,2vw,2rem)]">The idea comes from plant-based. Bringing a natural feeling and creating a deeper connection to the senses.</div>
-          </div>
-        </div>`,
-        `<div class="w-full max-w-2xl mx-auto text-left mt-2 mb-4">
-          <div class="font-bold font-space mb-2 text-[clamp(1.1rem,3.5vw,1.7rem)] md:text-[clamp(1.3rem,2vw,2rem)]">Inspired by<br />the idea of a</div>
-          <div class="font-extrabold leading-tight mb-2 text-[clamp(2.2rem,7vw,3.5rem)] md:text-[clamp(3rem,5vw,4.5rem)]">warm<br />salad,</div>
-          <div class="font-bold font-space mt-2 text-[clamp(1.1rem,3.5vw,1.7rem)] md:text-[clamp(1.3rem,2vw,2rem)]">this cocktail combines grilled asparagus, fresh herbs, and soy whey from both<br />Canada and Taiwan.</div>
-        </div>`
-      ];
       return (
-        <div className="flex flex-col min-h-screen bg-white px-4 pt-10 pb-8">
-          {/* 內容區塊：逐行打字動畫 */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            <TypewriterSequenceHTML
-              lines={lines}
-              className=""
+        <div className="flex flex-col min-h-screen bg-white px-4 pt-10 pb-8 relative">
+          {/* 瓶子圖 - 增加尺寸並靠左一些 */}
+          <motion.img
+            src={images['../assets/don_julio_blanco.svg']}
+            alt="don_julio_blanco"
+            className="absolute bottom-0 right-[5%] w-[55vw] max-w-[450px] h-[75vh] min-h-[360px] z-10"
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5, type: 'spring' }}
+            style={{ objectFit: 'contain', objectPosition: 'bottom right' }}
+          />
+          
+          {/* 內容區域 - 減少右側間距來適應更大的瓶子 */}
+          <div className="flex-1 z-20 pr-[30vw] md:pr-[25vw] lg:pr-[22vw]">
+            {/* 使用 MultiStepTypewriter 確保按順序顯示 */}
+            <MultiStepTypewriter
+              steps={[
+                {
+                  html: '<div class="flex flex-col md:flex-row items-start md:items-center w-full max-w-2xl mb-6 md:gap-4">' +
+                        '<img src="' + images['../assets/plant_based_logo.svg'] + '" alt="plant-based-logo" ' +
+                        'class="w-16 h-16 md:w-20 md:h-20 mb-2 md:mb-0 md:mr-4 flex-shrink-0 z-20" />' +
+                        '<div class="flex flex-col justify-center w-full">' +
+                        '<span class="font-extrabold text-shadow-strong text-[clamp(3rem,10vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">Planta Mood</span>' +
+                        '</div></div>',
+                  className: ""
+                },
+                {
+                  html: '<span class="font-normal text-shadow-strong text-[clamp(1.3rem,4vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] leading-snug block max-w-2xl">The idea comes from plant-based. Bringing a natural feeling and creating a deeper connection to the senses.</span>',
+                  className: "mb-8"
+                },
+                {
+                  html: '<div class="w-full max-w-2xl text-left mt-8">' +
+                        '<span class="font-normal text-shadow-strong text-[clamp(1.3rem,4vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block">Inspired by<br />the idea of a</span>' +
+                        '</div>',
+                  className: "mb-3"
+                },
+                {
+                  html: '<span class="font-extrabold text-shadow-strong text-[clamp(3rem,10vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">warm<br />salad,</span>',
+                  className: "mb-3"
+                },
+                {
+                  html: '<span class="font-normal text-shadow-strong text-[clamp(1.3rem,4vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block">this cocktail combines grilled asparagus, fresh herbs, and soy whey from both Canada and Taiwan.</span>',
+                  className: "mt-3"
+                }
+              ]}
               typeSpeed={30}
-              delay={200}
-            />
-          </div>
-          {/* 瓶子區塊，永遠有存在感且不會蓋住內容 */}
-          <div className="absolute bottom-0 right-0 w-[45vw] max-w-[400px] h-[60vh] min-h-[280px]">
-            <img
-              src={images['../assets/don_julio_blanco.svg']}
-              alt="don_julio_blanco"
-              className="w-full h-full"
-              style={{ objectFit: 'contain', objectPosition: 'bottom right' }}
+              delay={400}
             />
           </div>
         </div>
@@ -554,32 +678,36 @@ export default function MenuPager() {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full h-screen overflow-hidden bg-white"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      style={{ touchAction: 'pan-y' }}
-    >
-      {/* 左右箭頭提示 */}
-      <ArrowSVG left onClick={() => paginate(-1)} />
-      <ArrowSVG onClick={() => paginate(1)} />
-      <AnimatePresence initial={false} custom={direction} mode="wait">
-        <motion.div
-          key={page}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="absolute w-full h-full top-0 left-0"
+    <ResponsiveWrapper>
+      <div className="menu-pager">
+        <div
+          ref={containerRef}
+          className="relative w-full h-screen overflow-hidden bg-white"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          style={{ touchAction: 'pan-y' }}
         >
-          {renderPage()}
-        </motion.div>
-      </AnimatePresence>
-    </div>
+          {/* 左右箭頭提示 */}
+          <ArrowSVG left onClick={() => paginate(-1)} />
+          <ArrowSVG onClick={() => paginate(1)} />
+          <AnimatePresence initial={false} custom={direction} mode="wait">
+            <motion.div
+              key={page}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute w-full h-full top-0 left-0"
+            >
+              {renderPage()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </ResponsiveWrapper>
   );
 } 

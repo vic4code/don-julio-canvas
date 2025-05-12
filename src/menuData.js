@@ -34,8 +34,8 @@ export const menuPages = [
       { src: 'frozen_grapes.svg', className: 'w-20 absolute right-24 top-1/2' }
     ],
     topText: [
-      'On top like a <b>salad dressing</b> , floating',
-      'combines purple carbbage , beetroot , Don Julio Reposado ,',
+      'On top like a <b>salad dressing</b> ',
+      ', floating combines purple carbbage , beetroot , Don Julio Reposado ,',
       'and Ice Wine of Cabernet .'
     ],
     bottomText: [

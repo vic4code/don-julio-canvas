@@ -1,10 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-export default function ResponsiveWrapper({ vertical, horizontal }) {
+const ResponsiveWrapper = ({ children }) => {
+  const [deviceType, setDeviceType] = useState('desktop');
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 576) {
+        setDeviceType('mobile');
+      } else if (width < 992) {
+        setDeviceType('tablet');
+      } else {
+        setDeviceType('desktop');
+      }
+    };
+
+    // 初始檢查
+    handleResize();
+
+    // 監聽窗口調整大小事件
+    window.addEventListener('resize', handleResize);
+    
+    // 清理函數
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div className="w-full h-full">
-      <div className="block lg:hidden">{vertical}</div>
-      <div className="hidden lg:block">{horizontal}</div>
+    <div className={`responsive-wrapper device-${deviceType}`}>
+      {children}
     </div>
   );
-}
+};
+
+export default ResponsiveWrapper;
