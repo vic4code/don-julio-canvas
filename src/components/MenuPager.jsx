@@ -393,18 +393,18 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/don_julio_blanco.svg']}
             alt="don_julio_blanco"
-            className="absolute bottom-0 right-[2%] w-[65vw] max-w-[420px] h-[55vh] min-h-[320px] z-10 iphone-se-bottle"
+            className="absolute bottom-0 right-[2%] w-[70vw] max-w-[460px] h-[60vh] min-h-[350px] max-h-[90vh] z-10 iphone-se-bottle"
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5, type: 'spring' }}
             style={{ objectFit: 'contain', objectPosition: 'bottom right' }}
           />
           {/* 內容區域 */}
-          <div className="flex-1 z-20 pr-[26vw] md:pr-[25vw] lg:pr-[22vw] flex flex-col iphone-se-content">
+          <div className="flex-1 z-20 pr-[28vw] md:pr-[27vw] lg:pr-[24vw] flex flex-col iphone-se-content">
             <motion.div
               {...fadeInConfig}
             >
-              <div className="flex flex-col md:flex-row items-start md:items-center w-full max-w-2xl mb-3 md:mb-6 md:gap-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center w-full max-w-2xl mb-4 md:mb-8 md:gap-4">
                 <img 
                   src={images['../assets/plant_based_logo.svg']} 
                   alt="plant-based-logo"
@@ -414,18 +414,18 @@ export default function MenuPager() {
                   <span className="font-extrabold text-shadow-strong text-[clamp(2.2rem,7vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">Planta Mood</span>
                 </div>
               </div>
-              <span className="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] leading-snug block max-w-2xl mb-3 md:mb-8">
+              <span className="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] leading-snug block max-w-2xl mb-5 md:mb-10">
                 The idea comes from plant-based. Bringing a natural feeling and creating a deeper connection to the senses.
               </span>
-              <div className="w-full max-w-2xl text-left mt-3 md:mt-8 mb-1 md:mb-3">
+              <div className="w-full max-w-2xl text-left mt-12 md:mt-16 mb-2 md:mb-4">
                 <span className="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block">
                   Inspired by<br />the idea of a
                 </span>
               </div>
-              <span className="font-extrabold text-shadow-strong text-[clamp(2.2rem,7vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block mb-1 md:mb-3">
+              <span className="font-extrabold text-shadow-strong text-[clamp(2.2rem,7vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block mb-2 md:mb-4">
                 warm<br />salad,
               </span>
-              <span className="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block leading-tight mt-1 md:mt-3 mb-12">
+              <span className="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block leading-tight mt-2 md:mt-4 mb-16">
                 this cocktail combines grilled asparagus, fresh herbs, and soy whey from both Canada and Taiwan.
               </span>
             </motion.div>
@@ -576,35 +576,48 @@ export default function MenuPager() {
           }
         }
         
-        /* 特別針對 iPhone SE 尺寸的優化 */
+        /* 使用 CSS 中已有的 text-shadow-strong 樣式，它提供了清晰的白色邊框 */
+        /* 不需要額外修改文字樣式 */
+
+        /* 特別針對 iPhone SE 尺寸的優化 - 修正瓶子位置問題 */
         @media (max-width: 375px) and (max-height: 667px) {
           /* 專門針對 page4 */
           .iphone-se-bottle {
-            width: 36vw !important; 
+            width: 48vw !important; 
             height: 38vh !important;
-            min-height: 180px !important;
-            right: 0 !important;
-            bottom: 10px !important;
+            min-height: 160px !important;
+            max-height: 200px !important;
+            right: 0 !important; /* 不要使用負值，確保瓶子不會跑出視圖 */
+            bottom: 15% !important; /* 使用百分比來定位底部 */
+            max-width: 180px !important;
+            transform: none !important;
+            position: absolute !important;
+            object-fit: contain !important;
+            object-position: bottom right !important;
+            z-index: 10 !important;
           }
           
           .iphone-se-content {
-            padding-right: 22vw !important;
-            padding-bottom: 70px !important;
+            padding-right: 10vw !important;
+            padding-bottom: 40% !important; /* 增加底部填充，讓文字不會與瓶子重疊 */
+            max-width: 90% !important;
+            z-index: 20 !important;
           }
           
-          /* 減少段落間距 */
-          .mb-3 {
-            margin-bottom: 0.5rem !important;
+          /* 移動文字到瓶子上方 */
+          .mt-12 {
+            margin-top: 1rem !important;
           }
           
-          .mt-3 {
-            margin-top: 0.5rem !important;
+          .mb-16 {
+            margin-bottom: 2rem !important; /* 減少這個間距，因為我們已經增加了整體容器的底部填充 */
           }
-          
-          /* 增加底部最後一段的 margin */
-          .mb-12 {
-            margin-bottom: 5rem !important;
-          }
+        }
+        
+        /* 確保箭頭不被圖片遮擋 */
+        button[aria-label="Previous"], 
+        button[aria-label="Next"] {
+          z-index: 100 !important;
         }
       `}</style>
     </ResponsiveWrapper>
