@@ -380,11 +380,11 @@ export default function MenuPager() {
               typeSpeed={20}
               delay={200}
             />
-            <TypewriterSequenceHTML
-              lines={pageData.subtitle}
+            <TypewriterHTML
+              html="like blending dressing into a salad."
               className="text-2xl md:text-3xl font-normal font-space mt-2"
               typeSpeed={20}
-              delay={200}
+              delay={400}
             />
           </div>
         </div>
@@ -426,27 +426,15 @@ export default function MenuPager() {
             </div>
           )}
           
-          {/* 下半部文字優化，分兩段處理 */}
+          {/* 修改這裡：使用一個完整的 TypewriterHTML 而不是分兩段 */}
           {beanTopDone && (
             <div className="mt-8 text-center">
-              {/* 第一段 */}
               <TypewriterHTML
-                html="And add salt brings out a richer soy flavor, and triggers"
-                className="text-lg font-normal font-space mb-2"
+                html="And add salt brings out a richer soy flavor, and triggers <span class='font-extrabold text-4xl'>emulsification.</span>"
+                className="text-lg font-normal font-space"
                 typeSpeed={25}
                 delay={600}
-                onDone={() => setTimeout(() => setBeanBottomDone(true), 200)}
               />
-              
-              {/* 第二段 - emulsification (單獨一行) */}
-              {beanBottomDone && (
-                <TypewriterHTML
-                  html='<span class="font-extrabold text-4xl">emulsification.</span>'
-                  className="text-center block mt-1"
-                  typeSpeed={30}
-                  delay={100}
-                />
-              )}
             </div>
           )}
         </div>
@@ -481,40 +469,11 @@ export default function MenuPager() {
             style={{ pointerEvents: 'none' }}
           />
 
-          {/* 右側蘆筍群組 */}
-          <motion.img
-            src={images['../assets/asparagus.svg']}
-            alt="asparagus1"
-            className="absolute w-[40vw] max-w-[360px] right-[-10vw] top-[20%] z-0"
-            variants={imgBreath}
-            initial="initial"
-            animate="animate"
-            style={{ pointerEvents: 'none' }}
-          />
-          <motion.img
-            src={images['../assets/asparagus.svg']}
-            alt="asparagus2"
-            className="absolute w-[20vw] max-w-[360px] right-[-24vw] top-[35%] z-0"
-            variants={imgBreath}
-            initial="initial"
-            animate="animate"
-            style={{ pointerEvents: 'none' }}
-          />
-          <motion.img
-            src={images['../assets/asparagus.svg']}
-            alt="asparagus3"
-            className="absolute w-[30vw] max-w-[360px] right-[-30vw] top-[50%] z-0"
-            variants={imgBreath}
-            initial="initial"
-            animate="animate"
-            style={{ pointerEvents: 'none' }}
-          />
-
-          {/* 煙霧 - 從蘆筍上方冒出來，不重疊 */}
+          {/* 煙霧 - 放在蘆筍下方但不是最底層 */}
           <motion.img
             src={images['../assets/smoke.svg']}
             alt="smoke"
-            className="absolute w-[20vw] max-w-[240px] right-[10vw] top-[55%] z-10"
+            className="absolute w-[20vw] max-w-[240px] right-[10vw] top-[55%] z-1"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -523,7 +482,36 @@ export default function MenuPager() {
           <motion.img
             src={images['../assets/smoke.svg']} 
             alt="smoke"
-            className="absolute w-[20vw] max-w-[240px] left-[5vw] top-[35%] z-10"
+            className="absolute w-[20vw] max-w-[240px] left-[5vw] top-[35%] z-1"
+            variants={imgBreath}
+            initial="initial"
+            animate="animate"
+            style={{ pointerEvents: 'none' }}
+          />
+
+          {/* 右側蘆筍群組 */}
+          <motion.img
+            src={images['../assets/asparagus.svg']}
+            alt="asparagus1"
+            className="absolute w-[40vw] max-w-[360px] right-[-10vw] top-[20%] z-2"
+            variants={imgBreath}
+            initial="initial"
+            animate="animate"
+            style={{ pointerEvents: 'none' }}
+          />
+          <motion.img
+            src={images['../assets/asparagus.svg']}
+            alt="asparagus2"
+            className="absolute w-[20vw] max-w-[360px] right-[-24vw] top-[35%] z-2"
+            variants={imgBreath}
+            initial="initial"
+            animate="animate"
+            style={{ pointerEvents: 'none' }}
+          />
+          <motion.img
+            src={images['../assets/asparagus.svg']}
+            alt="asparagus3"
+            className="absolute w-[30vw] max-w-[360px] right-[-30vw] top-[50%] z-2"
             variants={imgBreath}
             initial="initial"
             animate="animate"
@@ -580,91 +568,112 @@ export default function MenuPager() {
           />
 
           {/* 使用文字陰影增加可讀性 */}
-          <div className="relative z-30 w-full h-full">
-            <MultiStepTypewriter
-              steps={[
-                {
-                  html: '<span class="text-shadow-strong">On top like a</span>',
-                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
-                },
-                {
-                  html: '<span class="font-extrabold text-5xl md:text-7xl block leading-tight text-shadow-strong">salad dressing</span>',
-                  className: "text-left"
-                },
-                {
-                  html: '<span class="text-shadow-strong">, floating</span>',
-                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
-                },
-                {
-                  html: '<span class="text-shadow-strong">combines purple cabbage, beetroot, Don Julio Reposado,</span>',
-                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left mt-4"
-                },
-                {
-                  html: '<span class="text-shadow-strong">and Ice Wine of Cabernet.</span>',
-                  className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
-                },
-                {
-                  html: `<div class="absolute right-0 bottom-0 mb-8 mr-2 text-right max-w-[15rem] md:max-w-[18rem] pr-0">
-                    <span class="font-normal text-2xl md:text-3xl text-shadow-strong">Pillitteri's</span><br/>
-                    <span class="font-extrabold text-5xl md:text-7xl block leading-tight text-shadow-strong" style="line-height:1.1;">late<br/>harvest</span><br/>
-                    <span class="font-normal text-xl md:text-2xl text-shadow-strong">icewine,</span><br/>
-                    <span class="font-normal text-xl md:text-2xl text-shadow-strong">made from Cabernet grapes,<br>is rich in red berry flavors.</span>
-                  </div>`,
-                  className: ""
-                }
-              ]}
-              typeSpeed={20}
-              delay={200}
-            />
+          <div className="relative z-30 w-full h-full flex flex-col justify-between">
+            {/* 頂部文字區域 */}
+            <div className="top-section pt-4 md:pt-8">
+              <MultiStepTypewriter
+                steps={[
+                  {
+                    html: '<span class="text-shadow-strong">On top like a</span>',
+                    className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
+                  },
+                  {
+                    html: '<span class="font-extrabold text-5xl md:text-7xl block leading-tight text-shadow-strong">salad dressing</span>',
+                    className: "text-left"
+                  },
+                  {
+                    html: '<span class="text-shadow-strong">, floating</span>',
+                    className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
+                  },
+                  {
+                    html: '<span class="text-shadow-strong">combines purple cabbage, beetroot, Don Julio Reposado,</span>',
+                    className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left mt-4"
+                  },
+                  {
+                    html: '<span class="text-shadow-strong">and Ice Wine of Cabernet.</span>',
+                    className: "text-2xl md:text-3xl font-space font-normal leading-tight text-left"
+                  }
+                ]}
+                typeSpeed={20}
+                delay={200}
+                onDone={() => setShowPage3BottomTexts(true)}
+              />
+            </div>
+            
+            {/* 底部文字區域 - 使用 MultiStepTypewriter 恢復打字效果 */}
+            <div className="bottom-section mb-8 md:mb-16 mt-auto">
+              {/* 使用 showPage3BottomTexts 控制顯示時機 */}
+              {showPage3BottomTexts && (
+                <MultiStepTypewriter
+                  steps={[
+                    {
+                      html: '<div class="text-right max-w-[15rem] md:max-w-[18rem] ml-auto">' +
+                            '<span class="font-normal text-2xl md:text-3xl text-shadow-strong">Pillitteri\'s</span><br/>' +
+                            '<span class="font-extrabold text-5xl md:text-7xl block leading-tight text-shadow-strong">late<br/>harvest</span>' +
+                            '</div>',
+                      className: ""
+                    },
+                    {
+                      html: '<div class="text-right max-w-[15rem] md:max-w-[18rem] ml-auto">' +
+                            '<span class="font-normal text-xl md:text-2xl text-shadow-strong">icewine,</span><br/>' +
+                            '<span class="font-normal text-xl md:text-2xl text-shadow-strong">made from Cabernet grapes,<br/>is rich in red berry flavors.</span>' +
+                            '</div>',
+                      className: ""
+                    }
+                  ]}
+                  typeSpeed={20}
+                  delay={200}
+                />
+              )}
+            </div>
           </div>
         </div>
       );
     }
     if (page === 4) {
       return (
-        <div className="flex flex-col min-h-screen bg-white px-4 pt-10 pb-8 relative">
-          {/* 瓶子圖 - 增加尺寸並靠左一些 */}
+        <div className="flex flex-col min-h-screen bg-white px-4 pt-6 pb-16 relative overflow-hidden">
+          {/* 瓶子圖 - 在小螢幕上更大 */}
           <motion.img
             src={images['../assets/don_julio_blanco.svg']}
             alt="don_julio_blanco"
-            className="absolute bottom-0 right-[5%] w-[55vw] max-w-[450px] h-[75vh] min-h-[360px] z-10"
+            className="absolute bottom-0 right-[2%] w-[65vw] max-w-[420px] h-[55vh] min-h-[320px] z-10 iphone-se-bottle"
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5, type: 'spring' }}
             style={{ objectFit: 'contain', objectPosition: 'bottom right' }}
           />
-          
-          {/* 內容區域 - 減少右側間距來適應更大的瓶子 */}
-          <div className="flex-1 z-20 pr-[30vw] md:pr-[25vw] lg:pr-[22vw]">
-            {/* 使用 MultiStepTypewriter 確保按順序顯示 */}
+          {/* 內容區域 - 增加底部空間 */}
+          <div className="flex-1 z-20 pr-[26vw] md:pr-[25vw] lg:pr-[22vw] flex flex-col iphone-se-content">
+            {/* MultiStepTypewriter - 使用更小的字體和間距 */}
             <MultiStepTypewriter
               steps={[
                 {
-                  html: '<div class="flex flex-col md:flex-row items-start md:items-center w-full max-w-2xl mb-6 md:gap-4">' +
+                  html: '<div class="flex flex-col md:flex-row items-start md:items-center w-full max-w-2xl mb-3 md:mb-6 md:gap-4">' +
                         '<img src="' + images['../assets/plant_based_logo.svg'] + '" alt="plant-based-logo" ' +
-                        'class="w-16 h-16 md:w-20 md:h-20 mb-2 md:mb-0 md:mr-4 flex-shrink-0 z-20" />' +
+                        'class="w-12 h-12 md:w-20 md:h-20 mb-1 md:mb-0 md:mr-4 flex-shrink-0 z-20" />' +
                         '<div class="flex flex-col justify-center w-full">' +
-                        '<span class="font-extrabold text-shadow-strong text-[clamp(3rem,10vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">Planta Mood</span>' +
+                        '<span class="font-extrabold text-shadow-strong text-[clamp(2.2rem,7vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">Planta Mood</span>' +
                         '</div></div>',
                   className: ""
                 },
                 {
-                  html: '<span class="font-normal text-shadow-strong text-[clamp(1.3rem,4vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] leading-snug block max-w-2xl">The idea comes from plant-based. Bringing a natural feeling and creating a deeper connection to the senses.</span>',
-                  className: "mb-8"
+                  html: '<span class="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] leading-snug block max-w-2xl">The idea comes from plant-based. Bringing a natural feeling and creating a deeper connection to the senses.</span>',
+                  className: "mb-3 md:mb-8"
                 },
                 {
-                  html: '<div class="w-full max-w-2xl text-left mt-8">' +
-                        '<span class="font-normal text-shadow-strong text-[clamp(1.3rem,4vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block">Inspired by<br />the idea of a</span>' +
+                  html: '<div class="w-full max-w-2xl text-left mt-3 md:mt-8">' +
+                        '<span class="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block">Inspired by<br />the idea of a</span>' +
                         '</div>',
-                  className: "mb-3"
+                  className: "mb-1 md:mb-3"
                 },
                 {
-                  html: '<span class="font-extrabold text-shadow-strong text-[clamp(3rem,10vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">warm<br />salad,</span>',
-                  className: "mb-3"
+                  html: '<span class="font-extrabold text-shadow-strong text-[clamp(2.2rem,7vw,5rem)] md:text-[clamp(4rem,8vw,6rem)] leading-tight block">warm<br />salad,</span>',
+                  className: "mb-1 md:mb-3"
                 },
                 {
-                  html: '<span class="font-normal text-shadow-strong text-[clamp(1.3rem,4vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block">this cocktail combines grilled asparagus, fresh herbs, and soy whey from both Canada and Taiwan.</span>',
-                  className: "mt-3"
+                  html: '<span class="font-normal text-shadow-strong text-[clamp(1rem,3vw,1.8rem)] md:text-[clamp(1.5rem,2.5vw,2.2rem)] block leading-tight">this cocktail combines grilled asparagus, fresh herbs, and soy whey from both Canada and Taiwan.</span>',
+                  className: "mt-1 md:mt-3 mb-12"
                 }
               ]}
               typeSpeed={30}
@@ -708,6 +717,146 @@ export default function MenuPager() {
           </AnimatePresence>
         </div>
       </div>
+      <style jsx>{`
+        :root {
+          --page-padding-large: 100px;
+          --page-padding-medium: 50px;
+          --page-padding-small: 30px;
+          --font-size-large: 1em;
+          --font-size-medium: 0.9em;
+          --font-size-small: 0.8em;
+        }
+        
+        .page3 .topText {
+          position: absolute;
+          top: 100px;
+          left: 100px;
+          right: 100px;
+          z-index: 2;
+        }
+        
+        @media (max-width: 380px) {
+          .page3 .topText {
+            top: 60px;
+            left: 30px;
+            right: 30px;
+          }
+          
+          .page3 .bottomText {
+            bottom: 60px;
+            left: 30px;
+            right: 30px;
+          }
+        }
+        
+        .page4 .bottomText {
+          position: absolute;
+          bottom: 100px;
+          left: 100px;
+          right: 100px;
+          z-index: 2;
+        }
+        
+        @media (max-width: 380px) {
+          .page4 .bottomText {
+            bottom: 40px;
+            left: 30px;
+            right: 30px;
+            font-size: 0.9em;
+          }
+        }
+        
+        // 通用 RWD 設定
+        @media (max-width: 768px) {
+          .page .mainText {
+            font-size: 0.9em;
+          }
+          
+          .page .topText, .page .bottomText {
+            left: 50px;
+            right: 50px;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .page .mainText {
+            font-size: 0.8em;
+          }
+          
+          .page .topText {
+            top: 70px;
+            left: 30px;
+            right: 30px;
+          }
+          
+          .page .bottomText {
+            bottom: 70px;
+            left: 30px;
+            right: 30px;
+          }
+          
+          .top-section {
+            padding-top: 1rem;
+          }
+          
+          .top-section .text-5xl {
+            font-size: 3rem;
+          }
+          
+          .top-section .text-2xl {
+            font-size: 1.4rem;
+          }
+          
+          .bottom-section {
+            margin-bottom: 0.5rem;
+          }
+          
+          .bottom-section .text-4xl {
+            font-size: 2.5rem;
+          }
+          
+          .bottom-section .text-xl {
+            font-size: 1rem;
+          }
+          
+          // page4 特殊處理
+          .page4 img.don_julio_blanco {
+            height: 45vh;
+            min-height: 220px;
+          }
+        }
+        
+        /* 特別針對 iPhone SE 尺寸的優化 */
+        @media (max-width: 375px) and (max-height: 667px) {
+          /* 專門針對 page4 */
+          .iphone-se-bottle {
+            width: 36vw !important; 
+            height: 38vh !important;
+            min-height: 180px !important;
+            right: 0 !important;
+            bottom: 10px !important;
+          }
+          
+          .iphone-se-content {
+            padding-right: 22vw !important;
+            padding-bottom: 70px !important;
+          }
+          
+          /* 減少段落間距 */
+          .mb-3 {
+            margin-bottom: 0.5rem !important;
+          }
+          
+          .mt-3 {
+            margin-top: 0.5rem !important;
+          }
+          
+          /* 增加底部最後一段的 margin */
+          .mb-12 {
+            margin-bottom: 5rem !important;
+          }
+        }
+      `}</style>
     </ResponsiveWrapper>
   );
 } 
