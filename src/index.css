@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.beans-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  margin: 48px auto 48px auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.bean-img {
+  width: 96px;
+  height: auto;
+  max-width: 28vw;
+  flex-shrink: 1;
+  display: block;
+}
+
+.arrow-btn {
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .beans-row {
+    gap: 12px;
+    width: 100%;
+    padding: 0 4vw;
+  }
+  .bean-img {
+    width: 72px;
+    max-width: 32vw;
+  }
+  .arrow-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+  .text-left, .text-right {
+    text-align: left !important;
+  }
+  .font-extrabold.text-3xl, .font-extrabold.text-4xl, .font-bold.text-2xl {
+    font-size: 1.5rem !important;
+  }
+  .md\:w-40, .md\:w-56, .md\:w-72 {
+    width: 32vw !important;
+    min-width: 80px;
+  }
+  .w-24, .md\:w-32, .md\:w-40, .w-28, .md\:w-44 {
+    width: 18vw !important;
+    min-width: 48px;
+    max-width: 80px;
+  }
+  .max-w-\[340px\] {
+    max-width: 92vw !important;
+  }
+  .w-\[55vw\], .w-\[60vw\], .w-\[48vw\], .w-\[38vw\], .max-w-\[420px\], .max-w-\[500px\], .max-w-\[360px\], .max-w-\[320px\], .max-w-\[540px\] {
+    max-width: 90vw !important;
+    width: 55vw !important;
+    min-width: 80px;
+  }
+  .max-w-\[360px\] {
+    max-width: 96vw !important;
+  }
+  .w-\[75vw\], .w-\[70vw\], .w-\[65vw\], .w-\[68vw\], .w-\[72vw\], .w-\[55vw\] {
+    width: 95vw !important;
+    max-width: none !important;
+  }
+  
+  .left-\[-25vw\], .right-\[-28vw\], .right-\[-22vw\], .right-\[-15vw\] {
+    left: -15vw !important;
+    right: -15vw !important;
+  }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+  }
+  
+  .w-\[85vw\], .w-\[82vw\], .w-\[80vw\], .w-\[65vw\] {
+    width: 120vw !important;
+    max-width: none !important;
+  }
+  
+  .left-\[-35vw\], .left-\[-32vw\], .right-\[-45vw\] {
+    left: -45vw !important;
+    right: -45vw !important;
+  }
+  
+  .max-w-\[300px\] {
+    max-width: 85vw !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+  }
+}
